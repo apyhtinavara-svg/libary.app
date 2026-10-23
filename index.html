@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Школьная библиотека</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --black: #1a1a1a;
+      --red: #c0392b;
+      --gray: #6b6b6b;
+      --light: #f5f5f5;
+      --border: #e0e0e0;
+      --white: #fff;
+    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--white); color: var(--black); font-size: 14px; }
+
+    /* HEADER */
+    .header { padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 14px; }
+    .logo-box { width: 48px; height: 48px; background: var(--black); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .logo-name { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .logo-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+    .header-contacts { display: flex; gap: 36px; }
+    .contact-label { font-size: 11px; color: var(--gray); }
+    .contact-value { font-size: 14px; font-weight: 600; color: var(--red); margin-top: 1px; }
+
+    /* NAV */
+    .nav { background: var(--black); display: flex; padding: 0 40px; }
+    .nav-item { padding: 13px 18px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.6); cursor: pointer; border-bottom: 3px solid transparent; transition: .15s; }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; border-bottom-color: var(--red); }
+
+    /* SEARCH */
+    .search-section { background: var(--light); border-bottom: 1px solid var(--border); padding: 24px 40px; }
+    .search-section h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+    .search-section p { font-size: 13px; color: var(--gray); margin-bottom: 14px; }
+    .search-row { display: flex; gap: 10px; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--gray); width: 16px; height: 16px; }
+    .search-input { width: 100%; height: 42px; border: 1.5px solid var(--border); border-radius: 4px; padding: 0 14px 0 38px; font-size: 14px; background: var(--white); outline: none; transition: .2s; }
+    .search-input:focus { border-color: var(--black); }
+    .btn-red { height: 42px; padding: 0 24px; background: var(--red); color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: .15s; }
+    .btn-red:hover { background: #a93226; }
+    .btn-outline { height: 42px; padding: 0 18px; background: none; border: 1.5px solid var(--border); border-radius: 4px; font-size: 13px; cursor: pointer; transition: .15s; }
+    .btn-outline:hover { border-color: var(--black); }
+
+    /* LAYOUT */
+    .layout { display: flex; min-height: calc(100vh - 260px); }
+
+    /* SIDEBAR */
+    .sidebar { width: 210px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 20px 0; }
+    .sidebar-heading { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray); padding: 4px 18px 8px; }
+    .sidebar-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 18px; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: .12s; }
+    .sidebar-item:hover { background: var(--light); }
+    .sidebar-item.active { border-left-color: var(--red); color: var(--red); font-weight: 600; background: #fff3f2; }
+    .sidebar-count { font-size: 11px; color: var(--gray); background: var(--light); padding: 1px 7px; border-radius: 20px; }
+    .sidebar-item.active .sidebar-count { background: #fad7d5; color: var(--red); }
+    .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 10px 18px; }
+
+    /* MAIN */
+    .main { flex: 1; padding: 22px 32px; }
+    .main-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .main-title { font-size: 16px; font-weight: 600; }
+    .main-meta { font-size: 12px; color: var(--gray); margin-top: 2px; }
+    .sort-select { border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-size: 13px; background: var(--white); outline: none; cursor: pointer; }
+
+    /* AI BADGE */
+    .ai-badge { display: none; align-items: center; gap: 6px; background: #fff3f2; border: 1px solid #fad7d5; color: var(--red); padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 14px; width: fit-content; }
+    .ai-badge.show { display: inline-flex; }
+
+    /* BOOK LIST */
+    .book-list { display: flex; flex-direction: column; }
+    .book-row { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: .12s; border-radius: 4px; }
+    .book-row:hover { background: var(--light); padding: 16px 10px; margin: 0 -10px; }
+    .book-cover { width: 48px; height: 66px; background: var(--light); border: 1px solid var(--border); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .book-info { flex: 1; min-width: 0; }
+    .book-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 3px; }
+    .book-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+    .book-score { flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--red); white-space: nowrap; }
+    .book-author { font-size: 13px; color: var(--gray); margin-bottom: 6px; }
+    .book-genre { display: inline-block; font-size: 11px; padding: 2px 8px; border: 1px solid #fad7d5; border-radius: 2px; color: var(--red); background: #fff3f2; margin-bottom: 7px; }
+    .book-desc { font-size: 13px; color: var(--gray); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* PAGINATION */
+    .pagination { display: flex; gap: 4px; justify-content: center; padding: 24px 0 8px; }
+    .pg-btn { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; background: var(--white); color: var(--black); transition: .12s; }
+    .pg-btn:hover { border-color: var(--black); }
+    .pg-btn.active { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+    .pg-btn.disabled { opacity: .35; pointer-events: none; }
+
+    /* EMPTY */
+    .empty { text-align: center; padding: 60px; color: var(--gray); }
+    .empty-icon { font-size: 38px; margin-bottom: 10px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; overflow-y: auto; padding: 40px 20px; }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal { background: var(--white); width: 100%; max-width: 640px; border-radius: 4px; overflow: hidden; }
+    .modal-head { background: var(--black); padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .modal-title { color: #fff; font-size: 18px; font-weight: 600; line-height: 1.3; }
+    .modal-author { color: rgba(255,255,255,.55); font-size: 13px; margin-top: 4px; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,.5); font-size: 24px; cursor: pointer; padding: 0; line-height: 1; margin-left: 16px; flex-shrink: 0; }
+    .modal-close:hover { color: #fff; }
+    .modal-body { padding: 24px; }
+    .modal-meta { display: flex; gap: 20px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .meta-label { font-size: 11px; color: var(--gray); }
+    .meta-val { font-size: 14px; font-weight: 600; }
+    .meta-val.red { color: var(--red); }
+    .modal-section { margin-bottom: 18px; }
+    .modal-section h4 { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; }
+    .modal-section p { font-size: 14px; line-height: 1.6; }
+
+    @media(max-width: 768px) {
+      .header { flex-wrap: wrap; gap: 10px; padding: 16px; }
+      .header-contacts { display: none; }
+      .nav { padding: 0 16px; overflow-x: auto; }
+      .search-section { padding: 18px 16px; }
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 10px 0; }
+      .main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-box">📚</div>
+    <div>
+      <div class="logo-name">Школьная библиотека</div>
+      <div class="logo-sub">Каталог книг · 717 изданий</div>
+    </div>
+  </div>
+  <div class="header-contacts">
+    <div>
+      <div class="contact-label">телефон</div>
+      <div class="contact-value">+7 (000) 000-00-00</div>
+    </div>
+    <div>
+      <div class="contact-label">Email</div>
+      <div class="contact-value">library@school.ru</div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-item active">Библиотека</div>
+  <div class="nav-item">Читателям</div>
+  <div class="nav-item">Каталог</div>
+  <div class="nav-item">Новинки</div>
+</nav>
+
+<div class="search-section">
+  <h2>Поиск книг</h2>
+  <p>Введите название, автора или опишите книгу — AI найдёт по смыслу</p>
+  <div class="search-row">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="q" placeholder="Например: мальчик волшебник, книга про дружбу, детектив в деревне..." onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <button class="btn-red" onclick="doSearch()">Найти</button>
+    <button class="btn-outline" onclick="clearSearch()">Сбросить</button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-heading">Жанры</div>
+    <div class="sidebar-item active" onclick="setGenre('',this)">
+      <span>Все книги</span><span class="sidebar-count">717</span>
+    </div>
+    <hr class="sidebar-divider">
+    <div class="sidebar-heading">Популярные</div>
+    <div class="sidebar-item" onclick="setGenre('роман',this)"><span>Роман</span><span class="sidebar-count">77</span></div>
+    <div class="sidebar-item" onclick="setGenre('детектив',this)"><span>Детектив</span><span class="sidebar-count">28</span></div>
+    <div class="sidebar-item" onclick="setGenre('фантастик',this)"><span>Фантастика</span><span class="sidebar-count">40</span></div>
+    <div class="sidebar-item" onclick="setGenre('детск',this)"><span>Для детей</span><span class="sidebar-count">246</span></div>
+    <div class="sidebar-item" onclick="setGenre('поэзи',this)"><span>Поэзия</span><span class="sidebar-count">41</span></div>
+    <div class="sidebar-item" onclick="setGenre('историческ',this)"><span>Историческая</span><span class="sidebar-count">32</span></div>
+    <div class="sidebar-item" onclick="setGenre('приключени',this)"><span>Приключения</span><span class="sidebar-count">17</span></div>
+    <div class="sidebar-item" onclick="setGenre('повест',this)"><span>Повесть</span><span class="sidebar-count">42</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="main-top">
+      <div>
+        <div class="main-title" id="mainTitle">Все книги</div>
+        <div class="main-meta" id="mainMeta">Загрузка...</div>
+      </div>
+      <select class="sort-select" id="sortSel" onchange="renderPage()">
+        <option value="def">По умолчанию</option>
+        <option value="az">По названию А–Я</option>
+        <option value="za">По названию Я–А</option>
+        <option value="author">По автору</option>
+      </select>
+    </div>
+
+    <div class="ai-badge" id="aiBadge">⭐ AI-поиск по смыслу</div>
+    <div class="book-list" id="bookList"></div>
+    <div class="pagination" id="pagination"></div>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="mTitle"></div>
+        <div class="modal-author" id="mAuthor"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="mMeta"></div>
+      <div class="modal-section"><h4>Описание</h4><p id="mDesc"></p></div>
+      <div class="modal-section" id="mFullWrap"><h4>Подробнее</h4><p id="mFull"></p></div>
+      <div class="modal-section" id="mWhyWrap"><h4>Почему стоит прочитать</h4><p id="mWhy"></p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PER = 20;
+let all = [], filtered = [], page = 1, genreKey = '', aiMode = false;
+const covers = ['📕','📗','📘','📙','📓','📒'];
+
+async function init() {
+  const r = await fetch('/api/search?q=&limit=717');
+  all = await r.json();
+  filtered = [...all];
+  renderPage();
+}
+
+function setGenre(key, el) {
+  genreKey = key;
+  aiMode = false;
+  document.getElementById('q').value = '';
+  document.getElementById('aiBadge').classList.remove('show');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  filtered = key ? all.filter(b => (b.genre||'').toLowerCase().includes(key)) : [...all];
+  document.getElementById('mainTitle').textContent = el.querySelector('span').textContent;
+  page = 1; renderPage();
+}
+
+async function doSearch() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) { clearSearch(); return; }
+  document.getElementById('mainMeta').textContent = 'Идёт поиск...';
+  const r = await fetch('/api/search?q=' + encodeURIComponent(q) + '&limit=300');
+  filtered = await r.json();
+  aiMode = true; page = 1;
+  document.getElementById('aiBadge').classList.add('show');
+  document.getElementById('mainTitle').textContent = 'Результаты поиска';
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  renderPage();
+}
+
+function clearSearch() {
+  document.getElementById('q').value = '';
+  aiMode = false; genreKey = '';
+  filtered = [...all];
+  document.getElementById('aiBadge').classList.remove('show');
+  document.getElementById('mainTitle').textContent = 'Все книги';
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.querySelector('.sidebar-item').classList.add('active');
+  page = 1; renderPage();
+}
+
+function sorted() {
+  const s = document.getElementById('sortSel').value;
+  const a = [...filtered];
+  if (s === 'az') a.sort((x,y) => (x.title||'').localeCompare(y.title||'','ru'));
+  else if (s === 'za') a.sort((x,y) => (y.title||'').localeCompare(x.title||'','ru'));
+  else if (s === 'author') a.sort((x,y) => (x.author||'').localeCompare(y.author||'','ru'));
+  return a;
+}
+
+function renderPage() {
+  const arr = sorted();
+  const total = arr.length;
+  const pages = Math.ceil(total / PER) || 1;
+  page = Math.min(page, pages);
+  const s = (page-1)*PER;
+  const slice = arr.slice(s, s+PER);
+
+  document.getElementById('mainMeta').textContent =
+    `Найдено ${total} книг · показаны ${s+1}–${Math.min(s+PER,total)}`;
+
+  const list = document.getElementById('bookList');
+  if (!slice.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📚</div>Книги не найдены. Попробуйте другой запрос.</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = slice.map((b,i) => `
+    <div class="book-row" onclick='openModal(${JSON.stringify(b).replace(/'/g,"&#39;")})'>
+      <div class="book-cover">${covers[(s+i)%covers.length]}</div>
+      <div class="book-info">
+        <div class="book-top">
+          <div class="book-title">${b.title||'—'}</div>
+          ${b.score!=null && aiMode ? `<div class="book-score">${b.score}%</div>` : ''}
+        </div>
+        <div class="book-author">${b.author||'—'}</div>
+        ${b.genre ? `<div class="book-genre">${b.genre}</div>` : ''}
+        <div class="book-desc">${b.short_description||''}</div>
+      </div>
+    </div>`).join('');
+
+  // Pagination
+  let html = `<div class="pg-btn ${page===1?'disabled':''}" onclick="page--;renderPage()">‹</div>`;
+  const from = Math.max(1,page-2), to = Math.min(pages,page+2);
+  if (from>1) html += `<div class="pg-btn" onclick="page=1;renderPage()">1</div>${from>2?'<div class="pg-btn disabled">…</div>':''}`;
+  for (let p=from;p<=to;p++) html += `<div class="pg-btn ${p===page?'active':''}" onclick="page=${p};renderPage()">${p}</div>`;
+  if (to<pages) html += `${to<pages-1?'<div class="pg-btn disabled">…</div>':''}<div class="pg-btn" onclick="page=${pages};renderPage()">${pages}</div>`;
+  html += `<div class="pg-btn ${page===pages?'disabled':''}" onclick="page++;renderPage()">›</div>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function openModal(b) {
+  document.getElementById('mTitle').textContent = b.title||'—';
+  document.getElementById('mAuthor').textContent = b.author||'—';
+  document.getElementById('mDesc').textContent = b.short_description||'—';
+  let meta = `<div><div class="meta-label">Жанр</div><div class="meta-val">${b.genre||'—'}</div></div>`;
+  if (b.score!=null && aiMode) meta += `<div><div class="meta-label">Совпадение</div><div class="meta-val red">${b.score}%</div></div>`;
+  document.getElementById('mMeta').innerHTML = meta;
+  const fw = document.getElementById('mFullWrap');
+  fw.style.display = b.full_description ? '' : 'none';
+  document.getElementById('mFull').textContent = b.full_description||'';
+  const ww = document.getElementById('mWhyWrap');
+  ww.style.display = b.why_read ? '' : 'none';
+  document.getElementById('mWhy').textContent = b.why_read||'';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+init();
+</script>
+</body>
+</html>
